@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">Operations overview</div><h1>Good day, PhotoLes</h1><p>Everything important across the next two weeks, at a glance.</p></div>
+  <a class="button primary" href="{{ url_for('slot_list') }}">Manage slots</a>
+</div>
+<section class="metrics" aria-label="Booking summary">
+  <article><span>Today’s bookings</span><strong>{{ today_count }}</strong></article>
+  <article><span>Upcoming bookings</span><strong>{{ upcoming_count }}</strong></article>
+  <article><span>Upcoming pax</span><strong>{{ upcoming_pax }}</strong></article>
+  <article><span>Available places</span><strong>{{ available_slots }}</strong></article>
+</section>
+<div class="split">
+  <section class="panel">
+    <div class="panel-heading"><div><h2>Next reservations</h2><p>Confirmed and upcoming</p></div><a href="{{ url_for('reservation_list') }}">View all</a></div>
+    {% if upcoming %}
+      <div class="compact-list">
+      {% for item in upcoming %}
+        <a href="{{ url_for('reservation_detail', reservation_id=item.id) }}">
+          <time><b>{{ local_datetime(item.start_at).strftime('%d %b') }}</b>{{ local_datetime(item.start_at).strftime('%H:%M') }}</time>
+          <span><b>{{ item.customer_name }}</b><small>{{ item.number_of_pax }} pax · {{ item.phone }}</small></span><em>{{ booking_id(item) }}</em>
+        </a>
+      {% endfor %}
+      </div>
+    {% else %}<div class="empty">No upcoming reservations.</div>{% endif %}
+  </section>
+  <section class="panel">
+    <div class="panel-heading"><div><h2>14-day calendar</h2><p>Confirmed bookings by day</p></div></div>
+    <div class="calendar-grid">
+      {% for day, items in calendar_days %}
+      <a class="calendar-day {% if day == today %}today{% endif %}" href="{{ url_for('reservation_list', date=day.isoformat()) }}">
+        <span>{{ day.strftime('%a') }}</span><b>{{ day.day }}</b><em>{{ items|length }} booking{{ '' if items|length == 1 else 's' }}</em>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

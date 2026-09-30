@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Time slots{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">Availability controls</div><h1>Time slots</h1><p>Create, adjust, enable, or disable bookable times.</p></div></div>
+<section class="panel block-panel">
+  <div><div class="eyebrow">Temporary closure</div><h2>Block slots</h2><p>Block one slot, a time period, or an entire operating day. The Telegram bot will stop offering matching slots immediately.</p></div>
+  <form method="post" action="{{ url_for('slot_block_create') }}" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Date<input type="date" name="date" required value="{{ selected_date.isoformat() if selected_date else today.isoformat() }}"></label>
+    <label>From<input type="time" name="start_time" required min="11:00" max="20:40" step="1200" value="11:00"></label>
+    <label>Until<input type="time" name="end_time" required min="11:20" max="21:00" step="1200" value="21:00"></label>
+    <label class="reason-field">Reason<input name="reason" required minlength="3" maxlength="500" placeholder="Public holiday, private event…"></label>
+    <button class="button danger" type="submit">Block period</button>
+  </form>
+  <p class="hint">“Until” is the end of the blocked period. Existing reservations are not automatically cancelled and will be highlighted after blocking.</p>
+</section>
+<section class="panel form-panel"><h2>Add a slot</h2><form method="post" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Date<input type="date" name="date" required value="{{ selected_date.isoformat() if selected_date else today.isoformat() }}"></label><label>Start time<input type="time" name="time" required min="11:00" max="20:40" step="1200"></label><label>Capacity<input type="number" name="capacity" min="1" value="1" required></label><button class="button primary" type="submit">Create slot</button></form><p class="hint">Operating hours are 11:00–21:00 on a 20-minute schedule. Customer bookings still require four hours’ notice.</p></section>
+<form class="filter-bar" method="get"><label>Date<input type="date" name="date" value="{{ selected_date.isoformat() if selected_date else '' }}"></label><label class="checkbox"><input type="checkbox" name="show" value="all" {% if show_all %}checked{% endif %}> Include past and disabled</label><button class="button secondary" type="submit">Apply</button><a class="button ghost" href="{{ url_for('slot_list') }}">Reset</a></form>
+<section class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Slot</th><th>Date & time</th><th>Availability</th><th>Status</th><th>Edit slot</th></tr></thead><tbody>
+{% for slot in slots %}<tr><td><b>{{ slot_label(slot) }}</b></td><td><b>{{ local_datetime(slot.start_at).strftime('%d %b %Y') }}</b><small>{{ local_datetime(slot.start_at).strftime('%H:%M') }}</small></td><td>{{ slot.remaining }} available<small>{{ slot.reserved_count }} / {{ slot.capacity }} booked</small></td><td><span class="status {{ 'confirmed' if slot.is_active else 'cancelled' }}">{{ 'Available' if slot.is_active else 'Blocked / disabled' }}</span></td><td><form method="post" action="{{ url_for('slot_update', slot_id=slot.id) }}" class="row-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input aria-label="Date" type="date" name="date" value="{{ local_datetime(slot.start_at).date().isoformat() }}" required><input aria-label="Time" type="time" name="time" value="{{ local_datetime(slot.start_at).strftime('%H:%M') }}" required><input aria-label="Capacity" type="number" name="capacity" min="{{ [1, slot.reserved_count]|max }}" value="{{ slot.capacity }}" required><button class="button small secondary" type="submit">Save</button></form></td></tr>
+{% else %}<tr><td colspan="5" class="empty">No time slots found.</td></tr>{% endfor %}</tbody></table></div></section>
+<section class="panel table-panel block-history">
+  <div class="panel-heading"><div><h2>Blocking history</h2><p>Permanent audit record of closures and releases</p></div></div>
+  <div class="table-scroll"><table><thead><tr><th>Blocked period</th><th>Reason</th><th>Blocked by</th><th>Recorded at</th><th>Impact</th><th>Status</th></tr></thead><tbody>
+  {% for block in blocks %}<tr><td><b>{{ local_datetime(block.start_at).strftime('%d %b %Y') }}</b><small>{{ local_datetime(block.start_at).strftime('%H:%M') }}–{{ local_datetime(block.end_at).strftime('%H:%M') }}</small></td><td>{{ block.reason }}</td><td>{{ block.blocked_by }}{% if block.released_by %}<small>Released by {{ block.released_by }}</small>{% endif %}</td><td>{{ local_datetime(block.blocked_at).strftime('%d %b %Y') }}<small>{{ local_datetime(block.blocked_at).strftime('%H:%M:%S') }}</small></td><td>{{ block.affected_slot_count }} slots<small>{{ block.confirmed_reservation_count }} existing bookings</small></td><td>{% if block.is_active %}<form method="post" action="{{ url_for('slot_block_release', block_id=block.id) }}" onsubmit="return confirm('Release this block and restore eligible slots?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button small secondary" type="submit">Active · Release</button></form>{% else %}<span class="status cancelled">Released</span><small>{{ local_datetime(block.released_at).strftime('%d %b %Y %H:%M:%S') }}</small>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="6" class="empty">No slot blocks have been recorded.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+{% endblock %}

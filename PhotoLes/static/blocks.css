@@ -1,0 +1,31 @@
+.form-panel,
+.block-panel {
+  margin-bottom: 20px;
+}
+
+.block-panel h2 {
+  margin-bottom: 8px;
+}
+
+.block-panel > div > p {
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+
+.block-panel .inline-form {
+  background: #f4e7e3;
+}
+
+.block-panel .reason-field {
+  flex: 2;
+}
+
+.block-history {
+  margin-top: 22px;
+}
+
+.admin-name {
+  color: #d8dfda;
+  font-size: 12px;
+  white-space: nowrap;
+}

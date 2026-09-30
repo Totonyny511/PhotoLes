@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Reservations{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">Booking operations</div><h1>Reservations</h1><p>Search, filter, inspect, and export bookings.</p></div></div>
+<form class="filter-bar" method="get">
+  <label>Search<input type="search" name="q" value="{{ query }}" placeholder="Booking ID, slot, name, phone, email…"></label>
+  <label>Date<input type="date" name="date" value="{{ selected_date.isoformat() if selected_date else '' }}"></label>
+  <label>Status<select name="status"><option value="confirmed" {% if status == 'confirmed' %}selected{% endif %}>Confirmed</option><option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelled</option><option value="all" {% if status == 'all' %}selected{% endif %}>All</option></select></label>
+  <button class="button secondary" type="submit">Apply filters</button>
+  <a class="button ghost" href="{{ url_for('reservation_list') }}">Reset</a>
+</form>
+<section class="panel table-panel">
+  <div class="panel-heading"><div><h2>{{ reservations|length }} result{{ '' if reservations|length == 1 else 's' }}</h2></div><a class="button small secondary" href="{{ url_for('reservation_export', status=status, from=selected_date.isoformat() if selected_date else '', to=selected_date.isoformat() if selected_date else '') }}">Export CSV</a></div>
+  <div class="table-scroll"><table><thead><tr><th>Booking ID</th><th>Slot</th><th>Date & time</th><th>Customer</th><th>Contact</th><th>Pax</th><th>Status</th><th></th></tr></thead><tbody>
+  {% for item in reservations %}<tr><td><b>{{ booking_id(item) }}</b></td><td>{{ slot_label(item) }}</td><td>{{ local_datetime(item.start_at).strftime('%d %b %Y') }}<small>{{ local_datetime(item.start_at).strftime('%H:%M') }}</small></td><td>{{ item.customer_name }}<small>{{ item.email or 'No email' }}</small></td><td>{{ item.phone }}</td><td>{{ item.number_of_pax }}</td><td><span class="status {{ item.status }}">{{ item.status }}</span></td><td><a href="{{ url_for('reservation_detail', reservation_id=item.id) }}">Open</a></td></tr>
+  {% else %}<tr><td colspan="8" class="empty">No reservations match these filters.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

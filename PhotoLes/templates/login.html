@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block page_class %}login-page{% endblock %}
+{% block content %}
+<section class="login-card">
+  <div class="eyebrow">Admin portal</div>
+  <h1>Welcome back</h1>
+  <p class="muted">Sign in to manage PhotoLes bookings, slots, customers, and FAQs.</p>
+  <form method="post" action="{{ url_for('login_post', next=request.args.get('next', '')) }}" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Username
+      <input name="username" required minlength="2" maxlength="80" autocomplete="username" value="{{ request.form.get('username', '') }}">
+    </label>
+    <label>Password
+      <input type="password" name="password" required autofocus autocomplete="current-password">
+    </label>
+    <button class="button primary wide" type="submit">Sign in</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if faq else 'Add' }} FAQ{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('faq_list') }}">← Back to FAQs</a><div class="page-heading"><div><div class="eyebrow">Customer content</div><h1>{{ 'Edit FAQ' if faq else 'Add FAQ' }}</h1></div></div>
+<section class="panel narrow"><form method="post" class="stack"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Question<input name="question" maxlength="200" required value="{{ request.form.get('question', faq.question if faq else '') }}"></label><label>Answer<textarea name="answer" rows="9" maxlength="3500" required>{{ request.form.get('answer', faq.answer if faq else '') }}</textarea></label><div class="form-grid"><label>Category<input name="category" maxlength="50" value="{{ request.form.get('category', faq.category if faq else 'General') }}"></label><label>Sort order<input type="number" name="sort_order" value="{{ request.form.get('sort_order', faq.sort_order if faq else 0) }}"></label></div><div class="actions"><button class="button primary" type="submit">{{ 'Save changes' if faq else 'Create FAQ' }}</button><a class="button ghost" href="{{ url_for('faq_list') }}">Cancel</a></div></form></section>
+{% endblock %}

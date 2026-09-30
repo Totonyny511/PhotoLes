@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Customers{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">Customer directory</div><h1>Past customers</h1><p>Completed, non-cancelled visits grouped by Telegram account.</p></div></div>
+<form class="filter-bar" method="get"><label>Search<input type="search" name="q" value="{{ query }}" placeholder="Name, email, phone, Telegram ID…"></label><button class="button secondary" type="submit">Search</button><a class="button ghost" href="{{ url_for('customer_list') }}">Reset</a></form>
+<section class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Customer</th><th>Contact</th><th>Telegram ID</th><th>First visit</th><th>Last visit</th><th>Visits</th></tr></thead><tbody>{% for customer in customers %}<tr><td><b>{{ customer.customer_name }}</b><small>{{ customer.email or 'No email' }}</small></td><td>{{ customer.phone }}</td><td>{{ customer.telegram_user_id }}</td><td>{{ local_datetime(customer.first_visit_at).strftime('%d %b %Y') }}</td><td>{{ local_datetime(customer.last_visit_at).strftime('%d %b %Y') }}</td><td>{{ customer.visit_count }}</td></tr>{% else %}<tr><td colspan="6" class="empty">No completed customers found.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}
