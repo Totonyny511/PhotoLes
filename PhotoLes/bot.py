@@ -80,6 +80,10 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     level=logging.INFO,
 )
+# httpx logs request URLs at INFO level. Telegram Bot API URLs contain the bot
+# token, so allowing those records into hosted logs would disclose a credential.
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 LOGGER = logging.getLogger(__name__)
 
 

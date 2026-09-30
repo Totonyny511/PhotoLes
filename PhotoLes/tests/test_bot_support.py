@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
@@ -33,6 +34,12 @@ from bot import (
 )
 from reservation_repository import ReservationRepository, TimeSlot
 from support_repository import SupportRepository
+
+
+class LoggingSafetyTests(unittest.TestCase):
+    def test_http_client_info_logs_are_disabled(self) -> None:
+        self.assertGreaterEqual(logging.getLogger("httpx").level, logging.WARNING)
+        self.assertGreaterEqual(logging.getLogger("httpcore").level, logging.WARNING)
 
 
 class SupportBotFlowTests(unittest.TestCase):
